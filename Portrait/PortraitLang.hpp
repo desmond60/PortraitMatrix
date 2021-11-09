@@ -2,12 +2,12 @@
 
 //Перечисление которое хранит имена строк в языковом файле
 enum {
- MTitle,
+	MTitle,
 
- MMessage1,
- MMessage2,
- MMessage3,
- MMessage4,
+	MMessage1,
+	MMessage2,
+	MMessage3,
+	MMessage4,
 
- MButton,
+	MButton,
 };

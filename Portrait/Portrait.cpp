@@ -1,11 +1,8 @@
 #include "stdafx.h"
 
-#include "version.hpp"
-#include "quid.hpp"
-#include "PortraitLang.hpp"
+#include "PortraitUI.hpp"
 
-//Статическая переменная, которая хранит структуру для доступа к Far API.
-static struct PluginStartupInfo Info;
+
 
 /*
 Функция, которая вызывается Far-ом для того, 
@@ -55,19 +52,19 @@ void WINAPI GetPluginInfoW(struct PluginInfo *pluginInfo)
 */
 HANDLE WINAPI OpenW(const struct OpenInfo *OInfo)
 {
-	const wchar_t *MsgItems[] =
+	// Если главное окно не может отобразиться, то выходим
+	if (!ShowDialog()) return NULL;
+
+	const wchar_t* MsgItems[] =
 	{
 		Info.GetMsg(&MainGuid, MTitle),
-		Info.GetMsg(&MainGuid, MMessage1),
-		Info.GetMsg(&MainGuid, MMessage2),
-		Info.GetMsg(&MainGuid, MMessage3),
-		Info.GetMsg(&MainGuid, MMessage4),
-		L"\x01",       
-		Info.GetMsg(&MainGuid, MButton),
+		Info.GetMsg(&MainGuid, MSelectData),
+		L"\x01",
+		Info.GetMsg(&MainGuid, MOk),
 	};
 
-	Info.Message(&MainGuid, NULL, FMSG_WARNING | FMSG_LEFTALIGN, L"Contents", 
-	MsgItems, ARRAYSIZE(MsgItems), 1);     
+	Info.Message(&MainGuid, NULL, FMSG_WARNING | FMSG_LEFTALIGN, L"Contents",
+		MsgItems, ARRAYSIZE(MsgItems), 1);
 	                     
 	return NULL;
 }

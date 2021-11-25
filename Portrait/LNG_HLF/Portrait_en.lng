@@ -2,9 +2,26 @@
 
 "Constructing matrix portrait"
 
-""
-"Develop in the name of good"
-"FUCK"
-""
+"Select type image:"
+"BMP"
+"PNG"
+"JPEG"
+"TIFF"
 
-"&Ok"
+"Image size:"
+
+"Use color gradation?"
+"Show a picture?"
+
+"Begin"
+"Cancel"
+
+"Error"
+"Incorrect data!"
+"Ok"
+
+"Selected parameters:"
+"Image type:"
+"Constructing matrix portrait."
+"Constructing matrix portrait.."
+"Constructing matrix portrait..."

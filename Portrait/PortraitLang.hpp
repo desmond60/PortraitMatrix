@@ -4,10 +4,27 @@
 enum {
 	MTitle,
 
-	MMessage1,
-	MMessage2,
-	MMessage3,
-	MMessage4,
+	MTypeImage,
+	MTypeBMP,
+	MTypePNG,
+	MTypeJPEG,
+	MTypeTIFF,
 
-	MButton,
+	MSizeImage,
+
+	MGrade,
+	MShowImage,
+
+	MBegin,
+	MCancel,
+
+	MError,
+	MIncorrectData,
+	MOk,
+
+	MSelectData,
+	MImageType,
+	MTitle1,
+	MTitle2,
+	MTitle3,
 };

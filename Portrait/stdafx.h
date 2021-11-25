@@ -11,6 +11,8 @@
 // Файлы заголовков Windows
 #include <windows.h>
 
+#include "DlgBuilder.hpp"
+#include "version.hpp"
+#include "guid.hpp"
+#include "PortraitLang.hpp"
 
-
-// установите здесь ссылки на дополнительные заголовки, требующиеся для программы

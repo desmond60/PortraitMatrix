@@ -16,12 +16,15 @@
     <Filter Include="Исходные файлы\LNG_HLF">
       <UniqueIdentifier>{d7b48fd8-f6fc-466e-a0e5-88e06ec842a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\UI">
+      <UniqueIdentifier>{7ef55357-2424-41c6-9649-af6153d5bd34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PortraitLang.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="quid.hpp">
+    <ClInclude Include="guid.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="version.hpp">
@@ -35,6 +38,12 @@
     </ClInclude>
     <ClInclude Include="plugin.hpp">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgBuilder.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="PortraitUI.hpp">
+      <Filter>Файлы заголовков\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

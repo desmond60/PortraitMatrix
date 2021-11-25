@@ -157,9 +157,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DlgBuilder.hpp" />
     <ClInclude Include="plugin.hpp" />
     <ClInclude Include="PortraitLang.hpp" />
-    <ClInclude Include="quid.hpp" />
+    <ClInclude Include="PortraitUI.hpp" />
+    <ClInclude Include="guid.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="version.hpp" />

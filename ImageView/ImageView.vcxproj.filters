@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="UI">
+      <UniqueIdentifier>{8a9c32a3-0d41-4009-afe1-aac3799a3ef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dist">
+      <UniqueIdentifier>{7c663f71-3d36-4c4f-8491-95e5ba0988af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IV_HEADER">
+      <UniqueIdentifier>{ba5a93ec-40f3-4872-bfae-c5d6ac65f2ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IV_HEADER\common">
+      <UniqueIdentifier>{a31419f3-62b7-4df8-9860-5d4851db390d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IV_SRC">
+      <UniqueIdentifier>{f0dc70cb-5df3-4a84-b13e-bb3d673272c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="version.h" />
+    <ClInclude Include="common.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="image_lib.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="image_list.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="operations.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="screen.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="viewer.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="viewer_qv.h">
+      <Filter>IV_HEADER</Filter>
+    </ClInclude>
+    <ClInclude Include="PortraitUI.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\disable_warnings_in_std_begin.hpp">
+      <Filter>IV_HEADER\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\disable_warnings_in_std_end.hpp">
+      <Filter>IV_HEADER\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\disabled_warnings.hpp">
+      <Filter>IV_HEADER\common</Filter>
+    </ClInclude>
+    <ClInclude Include="string_rc.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="plugin.cpp" />
+    <ClCompile Include="viewer_qv.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="viewer.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="settings.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="screen.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="image_list.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="image_lib.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>IV_SRC</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="dist\ImageViewRus.lng">
+      <Filter>dist</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="dist\ImageViewEng.lng">
+      <Filter>dist</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="dist\ImageView_rus.hlf">
+      <Filter>dist</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="dist\ImageView_eng.hlf">
+      <Filter>dist</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
+</Project>

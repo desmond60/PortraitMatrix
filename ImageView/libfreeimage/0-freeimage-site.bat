@@ -1,0 +1,1 @@
+@start "freeimage" http://freeimage.sourceforge.net/download.html

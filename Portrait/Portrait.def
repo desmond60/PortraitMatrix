@@ -1,7 +1,0 @@
-LIBRARY        Portrait
-; DESCRIPTION    'Portrait Matrix'
-EXPORTS
-  GetGlobalInfoW
-  SetStartupInfoW
-  GetPluginInfoW
-  OpenW

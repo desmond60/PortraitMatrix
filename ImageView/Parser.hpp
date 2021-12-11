@@ -10,18 +10,33 @@
 
 using std::experimental::filesystem::path;
 
+struct InfoSparse {
+    size_t count_all = 0;       // Количество элементов в матрице
+    size_t count_positive = 0;  // Количество положительных элементов
+    size_t count_negative = 0;  // Количество негативных элементов
+    size_t count_non_zero = 0;  // Количество ненулевых элементов
+    size_t count_zero = 0;      // Количество нулевых элементов 
+    double max_element;         // Максимальный элемент 
+    double min_element;         // Минимальный элемент
+
+    double koef_rate; /// Коэффициент заполненности
+};
+
 class Parser
 {
 private:
     size_t _size;
+    InfoSparse info;
 
+    // Матрица
     std::vector<double> gg;
     std::vector<double> di;
-    std::vector<int>    ig;
-    std::vector<int>    jg;
+    std::vector<size_t>    ig;
+    std::vector<size_t>    jg;
 
-    std::vector<std::vector<int>> matrix;
-    bool IsCor = true;
+    std::vector<std::vector<int>> matrix; // Картинка
+
+    bool IsCor = true; // Переменная на корректность данных
 
 public:
     Parser(path _path) {
@@ -45,7 +60,8 @@ public:
     }
 
     void print() const;
-    bool GetCorrect() { return IsCor;  };
+    bool GetCorrect()    { return IsCor;  };
+    InfoSparse GetInfo() { return info;   };
     std::vector<std::vector<int>>& GetPortrait() { return matrix; };
 
     void Matrix_to_Pixel(size_t);
@@ -95,19 +111,17 @@ plugin_string Parser::Creat_Parser(path _path) {
 
 void Parser::Matrix_to_Pixel(size_t size_pict) {
 
-    double k;
     matrix.resize(size_pict);
     for (size_t i = 0; i < size_pict; i++)
         matrix[i].resize(size_pict);
 
-    k = size_pict / _size;
+    double k = size_pict / _size;
 
-    for (size_t i = 0; i < _size; i++) {
-        int i0 = ig[i];
-        int i1 = ig[i + 1];
+    if (k < 1) {
+        for (size_t i = 0; i < _size; i++) {
+            int i0 = ig[i];
+            int i1 = ig[i + 1];
 
-        if (k <= 0) /// сжимаем матрицу в картинку
-        {
             for (int j = i0; j < i1; j++)
             {
                 if (gg[j] > 0)
@@ -116,9 +130,12 @@ void Parser::Matrix_to_Pixel(size_t size_pict) {
                     matrix[(int)(k * i)][(int)(k * jg[j])] = -1;
             }
         }
-        else        /// растягиваем матрицу на картинку
-        {
-            for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++) /// диагональ, i_b - строка "большого пикселя"
+    }
+    else {
+        for (size_t i = 0; i < _size; i++) {
+            int i0 = ig[i];
+            int i1 = ig[i + 1];
+            for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++)
             {
                 for (int j_b = 0; j_b + k * i < k * (i + 1); j_b++)
                 {
@@ -126,12 +143,9 @@ void Parser::Matrix_to_Pixel(size_t size_pict) {
                         matrix[(int)(k * i) + i_b][(int)(k * i) + j_b] = 1;
                     if (di[i] < 0)
                         matrix[(int)(k * i) + i_b][(int)(k * i) + j_b] = -1;
-
                 }
-
                 for (int j = i0; j < i1; j++)
                 {
-                    matrix[(int)(k * i)][(int)(k * jg[j])] = 1;
                     for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++)
                     {
                         for (int j_b = 0; j_b + k * i < k * (i + 1); j_b++)
@@ -146,4 +160,26 @@ void Parser::Matrix_to_Pixel(size_t size_pict) {
             }
         }
     }
+
+    /// Сбор информации
+    size_t pos{ 0 };
+    info.max_element = di[0];
+    info.min_element = di[0];
+    for (size_t i = 0; i < _size; i++) {
+        if (di[i] > 0) info.count_positive++;
+        if (di[i] < 0) info.count_negative++;
+        if (di[i] > info.max_element) info.max_element = di[i];
+        if (di[i] < info.min_element) info.min_element = di[i];
+
+        for (size_t j = ig[i]; j < ig[i + 1]; j++, pos++) {
+            if (gg[pos] > 0) info.count_positive += 2;
+            if (gg[pos] < 0) info.count_negative += 2;
+            if (gg[pos] > info.max_element) info.max_element = gg[pos];
+            if (gg[pos] < info.min_element) info.min_element = gg[pos];
+        }
+    }
+    info.count_all = _size * _size;
+    info.count_non_zero = info.count_negative + info.count_positive;
+    info.count_zero = info.count_all - info.count_non_zero;
+    info.koef_rate = static_cast<double>(info.count_non_zero) / info.count_all * 100;
 }

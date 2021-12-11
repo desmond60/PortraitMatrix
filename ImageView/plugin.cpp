@@ -7,18 +7,11 @@
 #include "viewer_qv.h"
 #include "PortraitUI.hpp"
 
-bool IsImage = false;
-
-/**
- * Open image.
- * \param file_name image file name
- * \param show_wait show wait window flag
- * \param silent silent mode flag (true to show progress and error message)
- * \return image instance (nullptr on error)
- */
-image* open_image(const wchar_t* file_name, const bool silent);
+bool IsImage = false; // Подстраховка, после закрытия картинки не разрешаем
 
 
+/* Вызывается один раз, после загрузки DLL-модуля в память. 
+   Far Manager передает плагину информацию, необходимую для дальнейшей работы*/
 void WINAPI SetStartupInfoW(const PluginStartupInfo* psi)
 {
 	_PSI = *psi;
@@ -29,7 +22,7 @@ void WINAPI SetStartupInfoW(const PluginStartupInfo* psi)
 	image_lib::instance();	//Initialize image lib
 }
 
-
+/* Получение основной информации о плагине. */
 void WINAPI GetGlobalInfoW(GlobalInfo* info)
 {
 	info->StructSize = sizeof(GlobalInfo);
@@ -41,7 +34,7 @@ void WINAPI GetGlobalInfoW(GlobalInfo* info)
 	info->Author = TEXT(PLUGIN_AUTHOR);
 }
 
-
+/* Получение дополнительной информации о плагине. */
 void WINAPI GetPluginInfoW(PluginInfo* info)
 {
 	assert(info);
@@ -73,7 +66,7 @@ void WINAPI GetPluginInfoW(PluginInfo* info)
 #endif // _DEBUG
 }
 
-
+/* Анализ на открытие картинки в плагине. */
 HANDLE WINAPI AnalyseW(const AnalyseInfo* info)
 {
 	if (!info || info->StructSize < sizeof(AnalyseInfo) || !info->FileName || !settings::use_analyze)
@@ -85,14 +78,14 @@ HANDLE WINAPI AnalyseW(const AnalyseInfo* info)
 	return open_image(info->FileName, true);
 }
 
-
+/* Закрытия анализа. */
 void WINAPI CloseAnalyseW(const struct CloseAnalyseInfo* info)
 {
 	if (info && info->StructSize >= sizeof(CloseAnalyseInfo) && info->Handle)
 		delete reinterpret_cast<image*>(info->Handle);
 }
 
-
+/* Запуск плагина. */
 HANDLE WINAPI OpenW(const OpenInfo* info)
 {
 	if (IsImage) {
@@ -191,8 +184,8 @@ HANDLE WINAPI OpenW(const OpenInfo* info)
 	_PSI.PanelControl(PANEL_ACTIVE, FCTL_GETPANELINFO, 0, &panelInfo);
 
 	// Получаем размер текущего каталога панели
-	int Size = (int)_PSI.PanelControl(PANEL_ACTIVE, FCTL_GETPANELDIRECTORY, 0, 0);
-	FarPanelDirectory* directoryInfo = (FarPanelDirectory*)malloc(Size);
+	size_t Size_Dict = (int)_PSI.PanelControl(PANEL_ACTIVE, FCTL_GETPANELDIRECTORY, 0, 0);
+	FarPanelDirectory* directoryInfo = (FarPanelDirectory*)malloc(Size_Dict);
 
 	std::experimental::filesystem::path Path; // Путь к папке с матрицей
 
@@ -200,26 +193,21 @@ HANDLE WINAPI OpenW(const OpenInfo* info)
 		
 		// Получаем текущий каталог панели
 		directoryInfo->StructSize = sizeof(FarPanelDirectory);
-		_PSI.PanelControl(PANEL_ACTIVE, FCTL_GETPANELDIRECTORY, Size, directoryInfo);
+		_PSI.PanelControl(PANEL_ACTIVE, FCTL_GETPANELDIRECTORY, Size_Dict, directoryInfo);
 	
-		// Идём по всем выделенным элементам
-		//for (size_t I = 0; I < panelInfo.SelectedItemsNumber; I++)
-		//{
-
-			// Получаем первый выделенный элемент                                   //I
+		// Получаем первый элемент на котором находится курсор
 		size_t Size = _PSI.PanelControl(PANEL_ACTIVE, FCTL_GETSELECTEDPANELITEM, 0, 0);
 		PluginPanelItem* PPI = (PluginPanelItem*)malloc(Size);
 
 		if (PPI)
 		{
-			FarGetPluginPanelItem gpi = { sizeof(FarGetPluginPanelItem), Size, PPI };
-																	    //I
+			FarGetPluginPanelItem gpi = { sizeof(FarGetPluginPanelItem), Size, PPI };															    
 			_PSI.PanelControl(PANEL_ACTIVE, FCTL_GETSELECTEDPANELITEM, 0, &gpi);
 
 			size_t FullNameLen = (size_t)lstrlenW(directoryInfo->Name) + lstrlenW(PPI->FileName) + 8;
 			wchar_t* FullName = new wchar_t[FullNameLen];
-			if (FullName)
-			{
+
+			if (FullName) {
 				lstrcpy(FullName, directoryInfo->Name);
 				_FSF.AddEndSlash(FullName);
 				lstrcat(FullName, PPI->FileName);
@@ -241,12 +229,11 @@ HANDLE WINAPI OpenW(const OpenInfo* info)
 				return NULL;
 			}
 		}
-		//}
 	}
 
 	// Создание Парсера 
 	Parser parser(Path);
-	if (!parser.GetCorrect()) return NULL; // Если данные корректные
+	if (!parser.GetCorrect()) return NULL; // Если данные некорректные
 
 	// Если главное окно не может отобразиться, то выходим
 	if (!ShowDialog(Path, parser)) return NULL;

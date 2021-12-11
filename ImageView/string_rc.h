@@ -1,8 +1,9 @@
 #pragma once
 
-
-//! Plug-in strings
+//! Строки для плагина
 enum plugin_string {
+
+// *********** Image Viewer *********** // 
 	ps_title,
 
 	ps_read_in_progress,
@@ -92,7 +93,9 @@ enum plugin_string {
 	ps_op_flip_vert,
 	ps_op_tile_mode,
 	ps_op_close,
+//   ***********************************   // 
 
+// *********** Portrait Matrix *********** // 
 	MTypeImage,
 	MTypeBMP,
 	MTypePNG,
@@ -121,4 +124,5 @@ enum plugin_string {
 	MErrorFileIG,
 	MErrorFileJG,
 	MErrorFileKUSLAU
+//   ***********************************   //
 };

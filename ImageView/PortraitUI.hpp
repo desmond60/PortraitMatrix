@@ -18,10 +18,11 @@ using std::experimental::filesystem::path;
 PluginStartupInfo    _PSI;
 FarStandardFunctions _FSF;
 
-//! Plugin GUID {9D4A59D9-AD2D-478C-8F66-7D233CBB788D}
+//! Plugin GUID
 const GUID _FPG = { 0x9d4a59d9, 0xad2d, 0x478c, { 0x8f, 0x66, 0x7d, 0x23, 0x3c, 0xbb, 0x78, 0x8d } };
 const GUID _MenuGuid = { 0xa0fb9eb5, 0xedee, 0x42c3, {0xa3, 0x7f, 0x54, 0x9d, 0xe8, 0xc5, 0x97, 0xb4 } };
 
+/* Функция открытия картинки */
 image* open_image(const wchar_t* file_name, const bool silent)
 {
 	if (!silent) {
@@ -38,10 +39,8 @@ image* open_image(const wchar_t* file_name, const bool silent)
 			_PSI.Message(&_FPG, &_FPG, FMSG_WARNING | FMSG_MB_OK, nullptr, err_msg, sizeof(err_msg) / sizeof(err_msg[0]), 0);
 		}
 	}
-
 	return img;
 }
-
 
 enum class TypeImage { BMP, PNG };
 std::map<int, std::wstring> type_image = {
@@ -49,10 +48,8 @@ std::map<int, std::wstring> type_image = {
 	{ 1, L"PNG"}
 };
 
-bool is_digits(const std::wstring& str)
-{
-	bool is = std::all_of(str.begin(), str.end(), isdigit);
-	return is;
+bool is_digits(const std::wstring& str) {
+	return std::all_of(str.begin(), str.end(), isdigit);
 }
 
 static int CurrentTypeImage = static_cast<int>(TypeImage::BMP);
@@ -112,11 +109,12 @@ bool ShowDialog(path path, Parser parser) {
 
 			InfoWindow.AddText(MTitle3);
 
-			InfoWindow.AddSeparator();
+			InfoWindow.AddSeparator(); // Вставить черный разделитель
 			InfoWindow.AddButtons(1, new int{ MOk }, DIF_DISABLE);
 			InfoWindow.ShowDialog();
 
-			HANDLE hScreen = _PSI.SaveScreen(0, 0, -1, -1);
+			HANDLE hScreen = _PSI.SaveScreen(0, 0, -1, -1); // Остановка плагина 
+
 			parser.Matrix_to_Pixel(SizeImage);	// Создаем портрет матрицы
 			std::vector<std::vector<int>> portrait = parser.GetPortrait();
 			bitmap_image Image(SizeImage, SizeImage); // Создаем картинку
@@ -143,18 +141,33 @@ bool ShowDialog(path path, Parser parser) {
 						}
 			}
 			
+			// Создаем папку, где сохраним картинку и информацию о матрице
+			std::experimental::filesystem::create_directory(path.string() + "/output");
+
 			// Сохраняем картинку в файл
-			Image.save_image(path.string() + "/output.bmp");
+			Image.save_image(path.string() + "/output/portrait.bmp");
 
 			// Показать сразу картинку
 			if (isShowImage) {
-				image* img = open_image((path.wstring() + L"/output.bmp").c_str(), false);
+				image* img = open_image((path.wstring() + L"/output/portrait.bmp").c_str(), false);
 				if (img) {
 					viewer v(img);
 					v.show();
 				}
 			}
 
+			// Запись информации о матрице
+			InfoSparse MatInfo = parser.GetInfo();
+			std::ofstream fout(path.string() + "/output/info.txt");
+			fout << "Количество элементов: \t\t\t"           << MatInfo.count_all			  << std::endl;
+			fout << "Количество положительных элементов: \t" << MatInfo.count_positive		  << std::endl;
+			fout << "Количество отрицательных элементов: \t" << MatInfo.count_negative		  << std::endl;
+			fout << "Количество ненулевых элементов: \t"     << MatInfo.count_non_zero		  << std::endl;
+			fout << "Количество нулевых элементов: \t\t"     << MatInfo.count_zero            << std::endl;
+			fout << "Процент заполненности: \t\t\t"          << MatInfo.koef_rate      << "%" << std::endl;
+			fout << "Максимальный элемент: \t\t\t"           << MatInfo.max_element           << std::endl;
+			fout << "Минимальный элемент: \t\t\t"            << MatInfo.min_element           << std::endl;
+			fout.close();
 			
 			_PSI.RestoreScreen(hScreen);
 			isBegin = false;
@@ -170,6 +183,5 @@ bool ShowDialog(path path, Parser parser) {
 			isBegin = window.ShowDialog();
 		}
 	}
-	
 	return isBegin;
 }

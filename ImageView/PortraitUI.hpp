@@ -14,6 +14,7 @@
 #include "viewer_qv.h"
 
 using std::experimental::filesystem::path;
+using namespace std::experimental;
 
 PluginStartupInfo    _PSI;
 FarStandardFunctions _FSF;
@@ -42,42 +43,47 @@ image* open_image(const wchar_t* file_name, const bool silent)
 	return img;
 }
 
-enum class TypeImage { BMP, PNG };
-std::map<int, std::wstring> type_image = {
-	{ 0, L"BMP"},
-	{ 1, L"PNG"}
-};
-
 bool is_digits(const std::wstring& str) {
 	return std::all_of(str.begin(), str.end(), isdigit);
 }
 
-static int CurrentTypeImage = static_cast<int>(TypeImage::BMP);
-static wchar_t SizeImagedefault[16] = L"100";
-static int isGrade = 0;
-static int isShowImage = 0;
-static int SizeImage = 0;
-static rgb_t rgb_p = {255, 0, 0};
-static rgb_t rgb_n = {0, 0, 255};
-static rgb_t rgb = { 0, 0, 0 };
-
-
-bool ShowDialog(path path, Parser parser) {
+bool ShowDialog(path path, bool isDir) {
 
 	// Создаем главное окошко
 	PluginDialogBuilder window(_PSI, _FPG, _MenuGuid, ps_title, L"Contents", NULL);
 	
+	// ****************** КОЛОНКИ ***************************// 
 	window.StartColumns(); // Делим окно на колонки
+	
 	window.AddText(MTypeImage); // Сообщение выберите тип картинки
-	const int TypeIDs[] = { MTypeBMP, MTypePNG }; // Список расширений картинки
-	window.AddRadioButtons(&CurrentTypeImage, ARRAYSIZE(TypeIDs), TypeIDs, true);  // Добавление радиокнопок
+	const int TypeImage[] = { MTypeBMP, MTypePNG }; // Список расширений картинки
+	window.AddRadioButtons(&CurrentTypeImage, ARRAYSIZE(TypeImage), TypeImage, true);  // Добавление радиокнопок
+	
 	window.ColumnBreak(); // Добавить столбик
+
+	window.AddText(MMatrixSize); // Сообщение Размер матрицы
+	const int TypeSize[] = { MIG, MKUSLAU }; // Список размерность матрицы как читать
+	window.AddRadioButtons(&CurrentTypeMatrixSize, ARRAYSIZE(TypeSize), TypeSize, true);  // Добавление радиокнопок
+
 	window.EndColumns(); // Закрываем колонки
+
+	if (isDir) {
+		window.StartColumns(); // Делим окно на колонки
+		window.AddText(MFileExt); // Сообщение "Расширение файлов"
+		const int TypeExt[] = { MTXT, MDAT }; // Список расширение файлов
+		window.AddRadioButtons(&CurrentTypeExtFile, ARRAYSIZE(TypeExt), TypeExt, true);  // Добавление радиокнопок
+		window.ColumnBreak(); // Добавить столбик
+		window.EndColumns();
+	}
+	//********************************************************//
 
 	window.AddSeparator(); // Вставить черный разделитель
 
-	FarDialogItem* item = window.AddEditField((wchar_t*)&SizeImagedefault, 15, 15); // Добавление текстового поля
+	FarDialogItem* item = window.AddEditField((wchar_t*)&SizeImagedefault, 15, 15); // Добавление текстового поля "Размерность картинки"
 	window.AddTextBefore(item, MSizeImage);
+	window.AddSeparator(); // Вставить черный разделитель
+	item = window.AddEditField((wchar_t*)&SizeMatrix, 15, 15); // Добавление текстового поля "Размерность матрицы"
+	window.AddTextBefore(item, MMatrixSizeLabel);
 
 	window.AddSeparator(); // Вставить черный разделитель
 
@@ -91,97 +97,109 @@ bool ShowDialog(path path, Parser parser) {
 	// Показываем окно и ждем действие пользователя
 	bool isBegin = window.ShowDialog(); 
 
-	while (isBegin)
-	{
-		if (is_digits(SizeImagedefault)) {
-			SizeImage = wcstol(SizeImagedefault, nullptr, 10);
+	if (is_digits(SizeImagedefault) && is_digits(SizeMatrix)) {
+		PathFiles pathfiles;
+		SizeImage            = wcstol(SizeImagedefault, nullptr, 10);
+		pathfiles.SizeMatrix = wcstol(SizeMatrix,       nullptr, 10);
+		switch (CurrentTypeExtFile)
+		{
+		case 0:
+			pathfiles.fdi = path / "di.txt";
+			pathfiles.fgg = path / "gg.txt";
+			pathfiles.fig = path / "ig.txt";
+			pathfiles.fjg = path / "jg.txt";
+			if (pathfiles.SizeMatrix == 0)
+				pathfiles.fkuslau = path / "kuslau.txt";
+			break;
+		case 1:
+			pathfiles.fdi = path / "di.dat";
+			pathfiles.fgg = path / "gg.dat";
+			pathfiles.fig = path / "ig.dat";
+			pathfiles.fjg = path / "jg.dat";
+			if (pathfiles.SizeMatrix == 0)
+				pathfiles.fkuslau = path / "kuslau.dat";
+			break;
+		case 2:
+			pathfiles.fdi = path / ("di" + expansion);
+			pathfiles.fgg = path / ("gg" + expansion);
+			pathfiles.fig = path / ("ig" + expansion);
+			pathfiles.fjg = path / ("jg" + expansion);
+			if (pathfiles.SizeMatrix == 0)
+				pathfiles.fkuslau = path / ("kuslau" + expansion);
+			break;
+		}
 
-			PluginDialogBuilder InfoWindow(_PSI, _FPG, _MenuGuid, ps_title, L"Contents");
+		HANDLE hScreen = _PSI.SaveScreen(0, 0, -1, -1); // Остановка плагина 
 
-			InfoWindow.StartColumns(); // Делим окно на колонки
-			InfoWindow.AddText(MSelectData); // Сообщение Выбранные параметры:
-			FarDialogItem* Type = InfoWindow.AddReadonlyEditField(type_image[CurrentTypeImage].c_str(), 15);
-			InfoWindow.AddTextBefore(Type, MImageType);
-			FarDialogItem* Size = InfoWindow.AddReadonlyEditField((wchar_t*)&SizeImagedefault, 15);
-			InfoWindow.AddTextBefore(Size, MSizeImage);
-			InfoWindow.ColumnBreak(); // Добавить столбик
-			InfoWindow.EndColumns(); // Закрываем колонки
+		// Создание Парсера 
+		Parser parser(pathfiles);
+		if (!parser.GetCorrect()) return NULL; // Если данные некорректные
 
-			InfoWindow.AddText(MTitle3);
+		parser.Matrix_to_Pixel(SizeImage);	      // Создаем портрет матрицы
+		std::vector<std::vector<int>> portrait = parser.GetPortrait();
+		bitmap_image Image(SizeImage, SizeImage); // Создаем картинку
+		Image.set_all_channels(255, 255, 255);    // Заливаем картинку белым цветом
 
-			InfoWindow.AddSeparator(); // Вставить черный разделитель
-			InfoWindow.AddButtons(1, new int{ MOk }, DIF_DISABLE);
-			InfoWindow.ShowDialog();
-
-			HANDLE hScreen = _PSI.SaveScreen(0, 0, -1, -1); // Остановка плагина 
-
-			parser.Matrix_to_Pixel(SizeImage);	// Создаем портрет матрицы
-			std::vector<std::vector<int>> portrait = parser.GetPortrait();
-			bitmap_image Image(SizeImage, SizeImage); // Создаем картинку
-			Image.set_all_channels(255, 255, 255);    // Заливаем картинку белым цветом
-
-			if (isGrade) {
-				for (size_t y = 0; y < SizeImage; y++)
-					for (size_t x = 0; x < SizeImage; x++)
-						if (portrait[x][y] > 0) {
-							Image.set_pixel(x, y, rgb_p);
-							Image.set_pixel(y, x, rgb_p);
-						}
-						else if (portrait[x][y] < 0) {
-							Image.set_pixel(x, y, rgb_n);
-							Image.set_pixel(y, x, rgb_n);
-						}
-			}
-			else {
-				for (size_t y = 0; y < SizeImage; y++)
-					for (size_t x = 0; x < SizeImage; x++)
-						if (portrait[x][y] != 0) {
-							Image.set_pixel(x, y, rgb);
-							Image.set_pixel(y, x, rgb);
-						}
-			}
-			
-			// Создаем папку, где сохраним картинку и информацию о матрице
-			std::experimental::filesystem::create_directory(path.string() + "/output");
-
-			// Сохраняем картинку в файл
-			Image.save_image(path.string() + "/output/portrait.bmp");
-
-			// Показать сразу картинку
-			if (isShowImage) {
-				image* img = open_image((path.wstring() + L"/output/portrait.bmp").c_str(), false);
-				if (img) {
-					viewer v(img);
-					v.show();
-				}
-			}
-
-			// Запись информации о матрице
-			InfoSparse MatInfo = parser.GetInfo();
-			std::ofstream fout(path.string() + "/output/info.txt");
-			fout << "Количество элементов: \t\t\t"           << MatInfo.count_all			  << std::endl;
-			fout << "Количество положительных элементов: \t" << MatInfo.count_positive		  << std::endl;
-			fout << "Количество отрицательных элементов: \t" << MatInfo.count_negative		  << std::endl;
-			fout << "Количество ненулевых элементов: \t"     << MatInfo.count_non_zero		  << std::endl;
-			fout << "Количество нулевых элементов: \t\t"     << MatInfo.count_zero            << std::endl;
-			fout << "Процент заполненности: \t\t\t"          << MatInfo.koef_rate      << "%" << std::endl;
-			fout << "Максимальный элемент: \t\t\t"           << MatInfo.max_element           << std::endl;
-			fout << "Минимальный элемент: \t\t\t"            << MatInfo.min_element           << std::endl;
-			fout.close();
-			
-			_PSI.RestoreScreen(hScreen);
-			isBegin = false;
+		if (isGrade) {
+			for (size_t y = 0; y < SizeImage; y++)
+				for (size_t x = 0; x < SizeImage; x++)
+					if (portrait[x][y] > 0) {
+						Image.set_pixel(x, y, rgb_p);
+						Image.set_pixel(y, x, rgb_p);
+					}
+					else if (portrait[x][y] < 0) {
+						Image.set_pixel(x, y, rgb_n);
+						Image.set_pixel(y, x, rgb_n);
+					}
 		}
 		else {
-			PluginDialogBuilder WarningWindow(_PSI, _FPG, _MenuGuid, MError, L"Contents", nullptr, nullptr, FMSG_WARNING);
-
-			WarningWindow.AddText(MIncorrectData);
-			WarningWindow.AddSeparator();
-			WarningWindow.AddButtons(1, new int{ MOk });
-			WarningWindow.ShowDialog();
-
-			isBegin = window.ShowDialog();
+			for (size_t y = 0; y < SizeImage; y++)
+				for (size_t x = 0; x < SizeImage; x++)
+					if (portrait[x][y] != 0) {
+						Image.set_pixel(x, y, rgb);
+						Image.set_pixel(y, x, rgb);
+					}
 		}
+		
+		// Создаем папку, где сохраним картинку и информацию о матрице
+		filesystem::create_directory(path.string() + "/output");
+
+		// Сохраняем картинку в файл
+		Image.save_image(path.string() + "/output/portrait.bmp");
+
+		// Показать сразу картинку
+		if (isShowImage) {
+			image* img = open_image((path.wstring() + L"/output/portrait.bmp").c_str(), false);
+			if (img) {
+				viewer v(img);
+				v.show();
+			}
+		}
+
+		// Запись информации о матрице
+		InfoSparse MatInfo = parser.GetInfo();
+		std::ofstream fout(path.string() + "/output/info.txt");
+		fout << "Количество элементов: \t\t\t"           << MatInfo.count_all			  << std::endl;
+		fout << "Количество положительных элементов: \t" << MatInfo.count_positive		  << std::endl;
+		fout << "Количество отрицательных элементов: \t" << MatInfo.count_negative		  << std::endl;
+		fout << "Количество ненулевых элементов: \t"     << MatInfo.count_non_zero		  << std::endl;
+		fout << "Количество нулевых элементов: \t\t"     << MatInfo.count_zero            << std::endl;
+		fout << "Процент заполненности: \t\t\t"          << MatInfo.koef_rate      << "%" << std::endl;
+		fout << "Максимальный элемент: \t\t\t"           << MatInfo.max_element           << std::endl;
+		fout << "Минимальный элемент: \t\t\t"            << MatInfo.min_element           << std::endl;
+		fout.close();
+
+		_PSI.RestoreScreen(hScreen);
+	}
+	else {
+		PluginDialogBuilder WarningWindow(_PSI, _FPG, _MenuGuid, MError, L"Contents", nullptr, nullptr, FMSG_WARNING);
+
+		WarningWindow.AddText(MIncorrectData);
+		WarningWindow.AddSeparator();
+		WarningWindow.AddButtons(1, new int{ MOk });
+		WarningWindow.ShowDialog();
+
+		isBegin = window.ShowDialog();
 	}
 	return isBegin;
 }

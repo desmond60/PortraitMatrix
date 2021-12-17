@@ -90,13 +90,21 @@
 "Tile mode"
 "Close"
 
-"Select type image:"
+"Type image"
 "BMP"
 "PNG"
 "JPEG"
 "TIFF"
 
-"Image size:"
+"File Extension"
+".TXT"
+".DAT"
+
+"Matrix size "
+"Matrix size"
+"IG"
+"KUSLAU"
+"Image size  "
 
 "Use color gradation?"
 "Show a picture?"
@@ -108,13 +116,10 @@
 "Incorrect data!"
 "Ok"
 
-"Selected parameters:"
-"Image type:"
-"Constructing matrix portrait..."
+"File di not found!"
+"File gg not found"
+"File ig not found"
+"File jg not found"
+"File kuslau not found"
 
-"Non-existent directory!"
-"File di.txt not found!"
-"File gg.txt not found"
-"File ig.txt not found"
-"File jg.txt not found"
-"File kuslau.txt not found"
+"Select an "ig" file or folder!"

@@ -212,31 +212,49 @@ HANDLE WINAPI OpenW(const OpenInfo* info)
 				_FSF.AddEndSlash(FullName);
 				lstrcat(FullName, PPI->FileName);
 			}
-			Path = std::wstring(FullName);
-
-			// Проверка на директорию 
-			if (!std::experimental::filesystem::is_directory(Path)) {
-				const wchar_t* MsgItems[] =
-				{
-					_PSI.GetMsg(&_FPG, ps_title),
-					_PSI.GetMsg(&_FPG, MErrorDirectory),
-					L"\x01",
-					_PSI.GetMsg(&_FPG, MOk),
-				};
-
-				_PSI.Message(&_FPG, NULL, FMSG_WARNING | FMSG_LEFTALIGN, L"Contents",
-					MsgItems, ARRAYSIZE(MsgItems), 1);
-				return NULL;
-			}
+			Path = std::wstring(FullName); // Запоминаем путь
 		}
 	}
 
-	// Создание Парсера 
-	Parser parser(Path);
-	if (!parser.GetCorrect()) return NULL; // Если данные некорректные
+	// Проверка на то, что выбрали папку или файл (ig)
+	bool isDir = filesystem::is_directory(Path);
+	if (isDir) {
+		// Показываем окошко
+		if (!ShowDialog(Path , isDir))
+			return NULL;
+	}
+	else {
+		std::string fileName = Path.stem().string();
 
-	// Если главное окно не может отобразиться, то выходим
-	if (!ShowDialog(Path, parser)) return NULL;
+		// Проверим выбрали ли мы файл ig
+		if (fileName != "ig") {
+			const wchar_t* MsgItems[] =
+			{
+				_PSI.GetMsg(&_FPG, ps_title),
+				_PSI.GetMsg(&_FPG, MErrorData),
+				L"\x01",
+				_PSI.GetMsg(&_FPG, MOk),
+			};
+
+			_PSI.Message(&_FPG, NULL, FMSG_WARNING | FMSG_LEFTALIGN, L"Contents",
+				MsgItems, ARRAYSIZE(MsgItems), 1);
+			return NULL;
+		}
+
+		// Запомним расширение файла
+		expansion = Path.extension().string();
+
+		if (expansion == ".txt")
+			CurrentTypeExtFile = static_cast<int>(TypeExtFile::TXT);
+		else if (expansion == ".dat")
+			CurrentTypeExtFile = static_cast<int>(TypeExtFile::DAT);
+		
+		Path = Path.string().substr(0, Path.string().find_last_of("\\/"));
+
+		// Показываем окошко, если все GOOD
+		if (!ShowDialog(Path, false))
+			return NULL;
+	}
 
 	return NULL; // Все GOOD
 }

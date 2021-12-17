@@ -102,6 +102,14 @@ enum plugin_string {
 	MTypeJPEG,
 	MTypeTIFF,
 
+	MFileExt,
+	MTXT,
+	MDAT,
+
+	MMatrixSizeLabel,
+	MMatrixSize,
+	MIG,
+	MKUSLAU,
 	MSizeImage,
 
 	MGrade,
@@ -114,15 +122,12 @@ enum plugin_string {
 	MIncorrectData,
 	MOk,
 
-	MSelectData,
-	MImageType,
-	MTitle3,
-
-	MErrorDirectory,
 	MErrorFileDI,
 	MErrorFileGG,
 	MErrorFileIG,
 	MErrorFileJG,
-	MErrorFileKUSLAU
+	MErrorFileKUSLAU,
+
+	MErrorData
 //   ***********************************   //
 };

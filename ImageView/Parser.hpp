@@ -10,6 +10,37 @@
 
 using std::experimental::filesystem::path;
 
+enum class TypeImage { BMP, PNG };
+std::map<int, std::wstring> type_image = {
+    { 0, L"BMP"},
+    { 1, L"PNG"}
+};
+
+enum class TypeExtFile { TXT, DAT, NONE };
+std::map<int, std::wstring> type_ext = {
+    { 0, L"TXT"},
+    { 1, L"DATA"}
+};
+
+enum class MatrixSize { IG, KUSLAU };
+std::map<int, std::wstring> type_size = {
+    { 0, L"IG"},
+    { 1, L"KUSLAU"}
+};
+
+static int CurrentTypeExtFile = static_cast<int>(TypeExtFile::NONE);
+static int CurrentTypeMatrixSize = static_cast<int>(MatrixSize::IG);
+static int CurrentTypeImage = static_cast<int>(TypeImage::BMP);
+static std::string expansion;
+static wchar_t SizeImagedefault[16] = L"100";
+static wchar_t SizeMatrix[16] = L"0";
+static int isGrade = 0;
+static int isShowImage = 0;
+static int SizeImage = 0;
+static rgb_t rgb_p = { 255, 0, 0 };
+static rgb_t rgb_n = { 0, 0, 255 };
+static rgb_t rgb = { 0, 0, 0 };
+
 struct InfoSparse {
     size_t count_all = 0;       // Количество элементов в матрице
     size_t count_positive = 0;  // Количество положительных элементов
@@ -21,6 +52,16 @@ struct InfoSparse {
 
     double koef_rate; /// Коэффициент заполненности
 };
+
+struct PathFiles {
+    size_t SizeMatrix;
+    path fkuslau;
+    path fdi;
+    path fig;
+    path fjg;
+    path fgg;
+};
+
 
 class Parser
 {
@@ -39,7 +80,7 @@ private:
     bool IsCor = true; // Переменная на корректность данных
 
 public:
-    Parser(path _path) {
+    Parser(PathFiles _path) {
         plugin_string Mes = Creat_Parser(_path);
 
         if (Mes) {
@@ -55,8 +96,6 @@ public:
             _PSI.Message(&_FPG, NULL, FMSG_WARNING | FMSG_LEFTALIGN, L"Contents",
                 MsgItems, ARRAYSIZE(MsgItems), 1);
         }
-
-
     }
 
     void print() const;
@@ -67,44 +106,71 @@ public:
     void Matrix_to_Pixel(size_t);
 
 private:
-    plugin_string Creat_Parser(path);
+    plugin_string Creat_Parser(PathFiles _path);
 };
 
-plugin_string Parser::Creat_Parser(path _path) {
-    std::ifstream fin(_path / "kuslau.txt");
-    if (!fin.is_open()) return MErrorFileKUSLAU;
-    fin >> _size;
-    fin.close();
+plugin_string Parser::Creat_Parser(PathFiles _path) {
+    std::ifstream fin;
+    if (_path.SizeMatrix == 0) {
+        switch (CurrentTypeMatrixSize)
+        {
+        case 0:
+            fin.open(_path.fig);
+            if (!fin.is_open()) return MErrorFileIG;
+            size_t temp;
+            while (fin >> temp)
+                ig.push_back(temp);
+            fin.close();
+            _size = ig.size() - 1;
+            break;
+        case 1:
+            fin.open(_path.fkuslau);
+            if (!fin.is_open()) return MErrorFileKUSLAU;
+            fin >> _size;
+            fin.close();
+
+            ig.resize(_size + 1);
+            fin.open(_path.fig);
+            if (!fin.is_open()) return MErrorFileIG;
+            for (size_t i = 0; i < _size + 1; i++)
+                fin >> ig[i];
+            fin.close();
+            break;
+        }
+    }
+    else {
+        _size = _path.SizeMatrix;
+        ig.resize(_size + 1);
+        fin.open(_path.fig);
+        if (!fin.is_open()) return MErrorFileIG;
+        for (size_t i = 0; i < _size + 1; i++)
+            fin >> ig[i];
+        fin.close();
+    }
 
     di.resize(_size);
-    ig.resize(_size + 1);
+    jg.resize(ig[_size]);
+    gg.resize(ig[_size]);
 
-    fin.open(_path / "di.txt");
+    fin.open(_path.fdi);
     if (!fin.is_open()) return MErrorFileDI;
     for (size_t i = 0; i < _size; i++)
         fin >> di[i];
     fin.close();
 
-    fin.open(_path / "ig.txt");
-    if (!fin.is_open()) return MErrorFileIG;
-    for (size_t i = 0; i < _size + 1; i++)
-        fin >> ig[i];
-    fin.close();
-
-    jg.resize(ig[_size]);
-    gg.resize(ig[_size]);
-
-    fin.open(_path / "jg.txt");
+    fin.open(_path.fjg);
     if (!fin.is_open()) return MErrorFileJG;
     for (size_t i = 0; i < ig[_size]; i++)
         fin >> jg[i];
     fin.close();
 
-    fin.open(_path / "gg.txt");
+    fin.open(_path.fgg);
     if (!fin.is_open()) return MErrorFileGG;
     for (size_t i = 0; i < ig[_size]; i++)
         fin >> gg[i];
     fin.close();
+
+
 
     return ps_title; // ps_title = 0;
 }
@@ -115,7 +181,7 @@ void Parser::Matrix_to_Pixel(size_t size_pict) {
     for (size_t i = 0; i < size_pict; i++)
         matrix[i].resize(size_pict);
 
-    double k = size_pict / _size;
+    double k = (double)size_pict / (double)_size;
 
     if (k < 1) {
         for (size_t i = 0; i < _size; i++) {

@@ -97,16 +97,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="dist\ImageViewRus.lng">
+    <CopyFileToFolders Include="dist\PortraitMatrixRus.lng">
       <Filter>dist</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="dist\ImageViewEng.lng">
+    <CopyFileToFolders Include="dist\PortraitMatrixEng.lng">
       <Filter>dist</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="dist\ImageView_rus.hlf">
+    <CopyFileToFolders Include="dist\PortraitMatrix_rus.hlf">
       <Filter>dist</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="dist\ImageView_eng.hlf">
+    <CopyFileToFolders Include="dist\PortraitMatrix_eng.hlf">
       <Filter>dist</Filter>
     </CopyFileToFolders>
   </ItemGroup>

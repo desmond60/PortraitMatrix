@@ -171,7 +171,6 @@ plugin_string Parser::Creat_Parser(PathFiles _path) {
     fin.close();
 
 
-
     return ps_title; // ps_title = 0;
 }
 
@@ -183,49 +182,34 @@ void Parser::Matrix_to_Pixel(size_t size_pict) {
 
     double k = (double)size_pict / (double)_size;
 
-    if (k < 1) {
-        for (size_t i = 0; i < _size; i++) {
-            int i0 = ig[i];
-            int i1 = ig[i + 1];
-
+    for (size_t i = 0; i < _size; i++) {
+        int i0 = ig[i];
+        int i1 = ig[i + 1];
+        for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++)
+        {
+            for (int j_b = 0; j_b + k * i < k * (i + 1); j_b++)
+            {
+                if (di[i] > 0)
+                    matrix[(int)(k * i) + i_b][(int)(k * i) + j_b] = 1;
+                if (di[i] < 0)
+                    matrix[(int)(k * i) + i_b][(int)(k * i) + j_b] = -1;
+            }
             for (int j = i0; j < i1; j++)
             {
-                if (gg[j] > 0)
-                    matrix[(int)(k * i)][(int)(k * jg[j])] = 1;
-                if (gg[j] < 0)
-                    matrix[(int)(k * i)][(int)(k * jg[j])] = -1;
-            }
-        }
-    }
-    else {
-        for (size_t i = 0; i < _size; i++) {
-            int i0 = ig[i];
-            int i1 = ig[i + 1];
-            for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++)
-            {
-                for (int j_b = 0; j_b + k * i < k * (i + 1); j_b++)
+                for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++)
                 {
-                    if (di[i] > 0)
-                        matrix[(int)(k * i) + i_b][(int)(k * i) + j_b] = 1;
-                    if (di[i] < 0)
-                        matrix[(int)(k * i) + i_b][(int)(k * i) + j_b] = -1;
-                }
-                for (int j = i0; j < i1; j++)
-                {
-                    for (int i_b = 0; i_b + k * i < k * (i + 1); i_b++)
+                    for (int j_b = 0; j_b + k * i < k * (i + 1); j_b++)
                     {
-                        for (int j_b = 0; j_b + k * i < k * (i + 1); j_b++)
-                        {
-                            if (gg[j] > 0)
-                                matrix[(int)(k * i) + i_b][(int)(k * jg[j]) + j_b] = 1;
-                            if (gg[j] < 0)
-                                matrix[(int)(k * i) + i_b][(int)(k * jg[j]) + j_b] = -1;
-                        }
+                        if (gg[j] > 0)
+                            matrix[(int)(k * i) + i_b][(int)(k * jg[j]) + j_b] = 1;
+                        if (gg[j] < 0)
+                            matrix[(int)(k * i) + i_b][(int)(k * jg[j]) + j_b] = -1;
                     }
                 }
             }
         }
     }
+
 
     /// Сбор информации
     size_t pos{ 0 };

@@ -98,7 +98,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>FreeImageLib.lib;gdiplus.lib;gdi32.lib;kernel32.lib;user32.lib;advapi32.lib;shell32.lib;ole32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>libfreeimage\$(Platform)_$(Configuration)_v$(VisualStudioVersion)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>plugin.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>PortraitMatrix.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>editbin /nologo /subsystem:Console,$(MinOsVer) /osversion:$(MinOsVer) $(OutDir)$(TargetName)$(TargetExt) &gt; nul</Command>
@@ -143,10 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="dist\ImageViewEng.lng">
+    <CopyFileToFolders Include="dist\PortraitMatrixEng.lng">
       <FileType>Document</FileType>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="dist\ImageViewRus.lng">
+    <CopyFileToFolders Include="dist\PortraitMatrixRus.lng">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
@@ -185,10 +185,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="dist\ImageView_eng.hlf">
+    <CopyFileToFolders Include="dist\PortraitMatrix_eng.hlf">
       <FileType>Document</FileType>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="dist\ImageView_rus.hlf">
+    <CopyFileToFolders Include="dist\PortraitMatrix_rus.hlf">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>

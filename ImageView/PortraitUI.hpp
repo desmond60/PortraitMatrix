@@ -137,6 +137,7 @@ bool ShowDialog(path path, bool isDir) {
 
 		parser.Matrix_to_Pixel(SizeImage);	      // Создаем портрет матрицы
 		std::vector<std::vector<int>> portrait = parser.GetPortrait();
+
 		bitmap_image Image(SizeImage, SizeImage); // Создаем картинку
 		Image.set_all_channels(255, 255, 255);    // Заливаем картинку белым цветом
 

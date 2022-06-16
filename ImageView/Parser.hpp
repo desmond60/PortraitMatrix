@@ -28,7 +28,7 @@ std::map<int, std::wstring> type_size = {
     { 1, L"KUSLAU"}
 };
 
-static int CurrentTypeExtFile = static_cast<int>(TypeExtFile::NONE);
+static int CurrentTypeExtFile = static_cast<int>(TypeExtFile::TXT);
 static int CurrentTypeMatrixSize = static_cast<int>(MatrixSize::IG);
 static int CurrentTypeImage = static_cast<int>(TypeImage::BMP);
 static std::string expansion;
@@ -109,68 +109,132 @@ private:
     plugin_string Creat_Parser(PathFiles _path);
 };
 
-plugin_string Parser::Creat_Parser(PathFiles _path) {
+plugin_string Parser::Creat_Parser(PathFiles _path) {    
     std::ifstream fin;
+    FILE* f;
+    std::ofstream out("D:\\hello.txt");
     if (_path.SizeMatrix == 0) {
         switch (CurrentTypeMatrixSize)
         {
         case 0:
-            fin.open(_path.fig);
-            if (!fin.is_open()) return MErrorFileIG;
-            size_t temp;
-            while (fin >> temp)
-                ig.push_back(temp);
-            fin.close();
-            _size = ig.size() - 1;
+            if (expansion == ".dat") {
+                f = fopen(_path.fig.string().c_str(), "rb");
+                if (!f) return MErrorFileIG;
+                int temp;
+                fread(&temp, sizeof(int), 1, f);
+                do {
+                    ig.push_back(temp);
+                    fread(&temp, sizeof(int), 1, f);
+                } while (!feof(f));
+                fclose(f);
+                _size = ig.size() - 1;
+            }
+            else {
+                fin.open(_path.fig);
+                if (!fin.is_open()) return MErrorFileIG;
+                size_t temp;
+                while (fin >> temp)
+                    ig.push_back(temp);
+                if (ig.empty()) return MErrorIncorrectIG;
+                fin.close();
+                _size = ig.size() - 1;
+            }
             break;
         case 1:
-            fin.open(_path.fkuslau);
-            if (!fin.is_open()) return MErrorFileKUSLAU;
-            fin >> _size;
-            fin.close();
+            if (expansion == ".dat") {
+                f = fopen(_path.fkuslau.string().c_str(), "rb");
+                if (!f) return MErrorFileKUSLAU;
+                fread(&_size, sizeof(int), 1, f);
+                fclose(f);
 
-            ig.resize(_size + 1);
-            fin.open(_path.fig);
-            if (!fin.is_open()) return MErrorFileIG;
-            for (size_t i = 0; i < _size + 1; i++)
-                fin >> ig[i];
-            fin.close();
+                ig.resize(_size + 1);
+                f = fopen(_path.fig.string().c_str(), "rb");
+                if (!f) return MErrorFileIG;
+                for (int i = 0; i < _size + 1; i++) {
+                    fread(&ig[i], sizeof(int), 1, f);
+                }
+                fclose(f);
+            }
+            else {
+                fin.open(_path.fkuslau);
+                if (!fin.is_open()) return MErrorFileKUSLAU;
+                fin >> _size;
+                fin.close();
+
+                ig.resize(_size + 1);
+                fin.open(_path.fig);
+                if (!fin.is_open()) return MErrorFileIG;
+                for (size_t i = 0; i < _size + 1; i++)
+                    fin >> ig[i];
+                fin.close();
+            }
+
             break;
         }
     }
     else {
         _size = _path.SizeMatrix;
         ig.resize(_size + 1);
-        fin.open(_path.fig);
-        if (!fin.is_open()) return MErrorFileIG;
-        for (size_t i = 0; i < _size + 1; i++)
-            fin >> ig[i];
-        fin.close();
+        if (expansion == ".dat") {
+            f = fopen(_path.fig.string().c_str(), "rb");
+            if (!f) return MErrorFileIG;
+            for (size_t i = 0; i < _size + 1; i++)
+                fread(&ig[i], sizeof(int), 1, f);
+            fclose(f);
+        }
+        else {
+            fin.open(_path.fig);
+            if (!fin.is_open()) return MErrorFileIG;
+            for (size_t i = 0; i < _size + 1; i++)
+                fin >> ig[i];
+            fin.close();
+        }
+        
     }
 
     di.resize(_size);
     jg.resize(ig[_size]);
     gg.resize(ig[_size]);
 
-    fin.open(_path.fdi);
-    if (!fin.is_open()) return MErrorFileDI;
-    for (size_t i = 0; i < _size; i++)
-        fin >> di[i];
-    fin.close();
+    if (expansion == ".dat") {
+        f = fopen(_path.fdi.string().c_str(), "rb");
+        if (!f) return MErrorFileDI;
+        for (size_t i = 0; i < _size; i++)
+            fread(&di[i], sizeof(double), 1, f);
+        fclose(f);
 
-    fin.open(_path.fjg);
-    if (!fin.is_open()) return MErrorFileJG;
-    for (size_t i = 0; i < ig[_size]; i++)
-        fin >> jg[i];
-    fin.close();
+        f = fopen(_path.fjg.string().c_str(), "rb");
+        if (!f) return MErrorFileJG;
+        for (size_t i = 0; i < ig[_size]; i++)
+            fread(&jg[i], sizeof(int), 1, f);
+        fclose(f);
 
-    fin.open(_path.fgg);
-    if (!fin.is_open()) return MErrorFileGG;
-    for (size_t i = 0; i < ig[_size]; i++)
-        fin >> gg[i];
-    fin.close();
+        f = fopen(_path.fgg.string().c_str(), "rb");
+        if (!f) return MErrorFileGG;
+        for (size_t i = 0; i < ig[_size]; i++)
+            fread(&gg[i], sizeof(double), 1, f);
+        fclose(f);
+    }
+    else {
+        fin.open(_path.fdi);
+        if (!fin.is_open()) return MErrorFileDI;
+        for (size_t i = 0; i < _size; i++)
+            fin >> di[i];
+        fin.close();
 
+        fin.open(_path.fjg);
+        if (!fin.is_open()) return MErrorFileJG;
+        for (size_t i = 0; i < ig[_size]; i++)
+            fin >> jg[i];
+        fin.close();
 
+        fin.open(_path.fgg);
+        if (!fin.is_open()) return MErrorFileGG;
+        for (size_t i = 0; i < ig[_size]; i++)
+            fin >> gg[i];
+        fin.close();
+    }
+    out.close();
     return ps_title; // ps_title = 0;
 }
 

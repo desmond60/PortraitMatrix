@@ -104,6 +104,7 @@ bool ShowDialog(path path, bool isDir) {
 		switch (CurrentTypeExtFile)
 		{
 		case 0:
+			expansion = ".txt";
 			pathfiles.fdi = path / "di.txt";
 			pathfiles.fgg = path / "gg.txt";
 			pathfiles.fig = path / "ig.txt";
@@ -112,6 +113,7 @@ bool ShowDialog(path path, bool isDir) {
 				pathfiles.fkuslau = path / "kuslau.txt";
 			break;
 		case 1:
+			expansion = ".dat";
 			pathfiles.fdi = path / "di.dat";
 			pathfiles.fgg = path / "gg.dat";
 			pathfiles.fig = path / "ig.dat";
@@ -166,16 +168,35 @@ bool ShowDialog(path path, bool isDir) {
 		filesystem::create_directory(path.string() + "/output");
 
 		// Сохраняем картинку в файл
-		Image.save_image(path.string() + "/output/portrait.bmp");
+		switch (CurrentTypeImage)
+		{
+		case 0: 
+			Image.save_image(path.string() + "/output/portrait.bmp");
 
-		// Показать сразу картинку
-		if (isShowImage) {
-			image* img = open_image((path.wstring() + L"/output/portrait.bmp").c_str(), false);
-			if (img) {
-				viewer v(img);
-				v.show();
+			// Показать сразу картинку
+			if (isShowImage) {
+				image* img = open_image((path.wstring() + L"/output/portrait.bmp").c_str(), false);
+				if (img) {
+					viewer v(img);
+					v.show();
+				}
 			}
+			break;
+		case 1:
+			Image.save_image(path.string() + "/output/portrait.png");
+
+			// Показать сразу картинку
+			//if (isShowImage) {
+			//	image* img = open_image((path.wstring() + L"/output/portrait.png").c_str(), false);
+			//	if (img) {
+			//		viewer v(img);
+			//		v.show();
+			//	}
+			//}
+			//break;
 		}
+
+
 
 		// Запись информации о матрице
 		InfoSparse MatInfo = parser.GetInfo();

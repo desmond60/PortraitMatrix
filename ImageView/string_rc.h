@@ -128,6 +128,8 @@ enum plugin_string {
 	MErrorFileJG,
 	MErrorFileKUSLAU,
 
-	MErrorData
+	MErrorData,
+
+	MErrorIncorrectIG
 //   ***********************************   //
 };

@@ -112,7 +112,6 @@ private:
 plugin_string Parser::Creat_Parser(PathFiles _path) {    
     std::ifstream fin;
     FILE* f;
-    std::ofstream out("D:\\hello.txt");
     if (_path.SizeMatrix == 0) {
         switch (CurrentTypeMatrixSize)
         {
@@ -166,6 +165,7 @@ plugin_string Parser::Creat_Parser(PathFiles _path) {
                 if (!fin.is_open()) return MErrorFileIG;
                 for (size_t i = 0; i < _size + 1; i++)
                     fin >> ig[i];
+                if (ig.empty()) return MErrorIncorrectIG;
                 fin.close();
             }
 
@@ -187,6 +187,7 @@ plugin_string Parser::Creat_Parser(PathFiles _path) {
             if (!fin.is_open()) return MErrorFileIG;
             for (size_t i = 0; i < _size + 1; i++)
                 fin >> ig[i];
+            if (ig.empty()) return MErrorIncorrectIG;
             fin.close();
         }
         
@@ -234,7 +235,6 @@ plugin_string Parser::Creat_Parser(PathFiles _path) {
             fin >> gg[i];
         fin.close();
     }
-    out.close();
     return ps_title; // ps_title = 0;
 }
 

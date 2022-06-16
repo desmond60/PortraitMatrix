@@ -1,8 +1,40 @@
 ﻿.Language=English,English (English)
-.PluginContents=Portrait Matrix
+.PluginContents=for the user
 
 
 @Contents
-$ #Portrait Matrix#
+$^ #Building a matrix portrait#
 
-This is Portrait Matrix Plugin help=)
+  This plugin is designed to build a portrait of the matrix
+
+The input data for the plugin is a matrix stored in a sparse format:
+	• di     - array of real numbers for storing diagonal elements 
+	• gg     - array of real numbers for storing non-zero elements
+	• ig     - an array of integers to store the row numbers of the corresponding array elements gg
+	• jg     - an array of integers to store the column numbers of the corresponding array elements gg
+	• kuslau - stores a single integer, the dimension of the matrix (optional file)
+
+The output data of the plugin will be a PNG or BMP image of your choice and a file that contains detailed information about the matrix.
+
+@=~
+
+The plugin can be activated by selecting a folder with a matrix or a file ig.
+
+The plugin supports the matrix: 
+	• in text format (.txt)
+	• in binary format (.dat)
+
+Supports files without extension in text format.
+
+@=~
+
+To run the plugin, you need to: 
+	» So that the matrix files have the same extension
+	» Choose a graphic format (PNG или BMP)
+	» Choose from which file to read the size of the matrix (IG or KUSLAU), or enter a number in the "Matrix size" field
+	» Select the file extension if the plugin was launched through the folder
+
+If desired, you can: 
+	» Write the desired image size
+	» Select an item with color gradation
+	» Select show picture immediately after creating it

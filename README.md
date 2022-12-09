@@ -1,2 +1,3 @@
 # PortraitMatrix
- Portrait Matrix Plugin Far Manager
+
+Плагин для Far Manager, который создает картинку матрицы по ее портрету.
